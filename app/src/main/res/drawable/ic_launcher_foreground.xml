@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A sofa inside a play-button frame: furniture + reels. 108x108 adaptive canvas, art kept in the 66dp safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- rounded frame -->
+    <path
+        android:strokeColor="#E2B864"
+        android:strokeWidth="3"
+        android:fillColor="#00000000"
+        android:pathData="M38,30 H70 A8,8 0 0 1 78,38 V70 A8,8 0 0 1 70,78 H38 A8,8 0 0 1 30,70 V38 A8,8 0 0 1 38,30 Z" />
+    <!-- sofa back -->
+    <path
+        android:fillColor="#E2B864"
+        android:pathData="M42,47 H66 A3,3 0 0 1 69,50 V58 H39 V50 A3,3 0 0 1 42,47 Z" />
+    <!-- sofa seat + arms -->
+    <path
+        android:fillColor="#F4EFE8"
+        android:pathData="M36,56 A3,3 0 0 1 42,56 V60 H66 V56 A3,3 0 0 1 72,56 V66 H36 Z" />
+    <!-- legs -->
+    <path android:fillColor="#E2B864" android:pathData="M39,66 H42 V70 H39 Z" />
+    <path android:fillColor="#E2B864" android:pathData="M66,66 H69 V70 H66 Z" />
+    <!-- play mark -->
+    <path android:fillColor="#E2B864" android:pathData="M51,36 L58,40 L51,44 Z" />
+</vector>

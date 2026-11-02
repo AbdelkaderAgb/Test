@@ -1,0 +1,31 @@
+# Builds the demo APK on GitHub's servers — no Android Studio needed.
+# Push this folder to a GitHub repo, open the "Actions" tab, run "Build APK",
+# then download "furniture-reels-demo-apk" from the finished run.
+name: Build APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Build release APK (signed with debug key, demo only)
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: furniture-reels-demo-apk
+          path: app/build/outputs/apk/release/*.apk

@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#141110">
+<title>تطبيق ريلز المفروشات — نموذج تجريبي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1C1916; --muted:#6B635A; --ground:#FAF7F2; --card:#FFFFFF; --line:#E7E0D6;
+  --chip:#F0E8DC; --accent:#A35A12; --price:#8A4E10; --wa:#0F7A43; --dark:#141110;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#2a2522}
+body{font-family:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;color:var(--ink);display:flex;justify-content:center}
+a{color:inherit;text-decoration:none}
+button,input{font-family:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+#app{position:relative;width:100%;max-width:430px;height:100vh;height:100dvh;overflow:hidden;background:var(--ground)}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:84px;-webkit-overflow-scrolling:touch}
+.screen.noNav{padding-bottom:0}
+.pad{padding:16px}
+.row{display:flex;align-items:center;gap:8px}
+.h1{margin:0;font-size:24px;font-weight:700}
+.h2{margin:0;font-size:16px;font-weight:700}
+.muted{color:var(--muted)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;height:44px;display:flex;align-items:center}
+.chip span{display:flex;align-items:center;gap:4px;height:34px;padding:0 14px;border-radius:17px;background:#fff;border:1px solid #DDD5CA;font-size:13px;font-weight:500;white-space:nowrap}
+.chip.on span{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
+.chip.accent.on span{background:var(--accent);border-color:var(--accent)}
+.chip.dark span{background:rgba(0,0,0,.38);border-color:rgba(255,255,255,.3);color:#fff}
+.chip.dark.on span{background:#fff;color:var(--dark);border-color:#fff}
+.iconBtn{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.iconBtn.light{background:rgba(255,255,255,.92)}
+.iconBtn.outline{background:#fff;border:1px solid var(--line)}
+.btn{height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700}
+.btn.wa{background:var(--wa);color:#fff}
+.btn.accent{background:var(--accent);color:#fff}
+.btn.ghost{background:#fff;border:1.5px solid #D9D0C3;font-weight:600}
+.card{background:var(--card);border:1px solid #EEE7DC;border-radius:16px}
+.badge{height:20px;padding:0 6px;border-radius:6px;background:#E4F1E8;color:#0B5E33;font-weight:700;font-size:11px;display:inline-flex;align-items:center}
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+nav.tabbar{position:absolute;left:0;right:0;bottom:0;height:72px;padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;background:#fff;border-top:1px solid var(--line);z-index:20}
+nav.tabbar.dark{background:#0E0C0B;border-top-color:#0E0C0B}
+nav.tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;font-size:11px;font-weight:500;color:var(--muted)}
+nav.tabbar.dark button{color:#A8A29A}
+nav.tabbar button.on{color:var(--ink);font-weight:700}
+nav.tabbar.dark button.on{color:#fff}
+/* reels */
+.reels{position:absolute;inset:0;overflow-y:scroll;scroll-snap-type:y mandatory;background:var(--dark);scrollbar-width:none}
+.reels::-webkit-scrollbar{display:none}
+.reel{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;color:#fff}
+.reel .art{position:absolute;inset:0;width:100%;height:100%}
+.reel .scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.55) 0%,rgba(0,0,0,0) 20%,rgba(0,0,0,0) 52%,rgba(0,0,0,.88) 100%)}
+.reel .kb{animation:kb 14s ease-in-out infinite alternate;transform-origin:50% 60%}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.09) translateY(-8px)}}
+.reelTop{position:absolute;top:0;left:0;right:0;padding:calc(10px + env(safe-area-inset-top)) 12px 0;z-index:5;color:#fff}
+.side{position:absolute;left:8px;bottom:196px;width:64px;display:flex;flex-direction:column;align-items:center;gap:16px;z-index:4}
+.side button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:600;color:#fff;min-height:44px}
+.caption{position:absolute;right:16px;left:82px;bottom:170px;z-index:4;display:flex;flex-direction:column;gap:8px}
+.productBar{position:absolute;right:12px;left:12px;bottom:86px;z-index:4;display:flex;align-items:center;gap:10px;padding:8px;border-radius:16px;background:rgba(20,17,16,.8);border:1px solid rgba(255,255,255,.16)}
+.progress{position:absolute;left:0;right:0;bottom:72px;height:3px;background:rgba(255,255,255,.22);z-index:4}
+.progress i{position:absolute;top:0;right:0;height:3px;background:#fff;width:0}
+.reel.playing .progress i{animation:prog 15s linear infinite}
+@keyframes prog{from{width:0}to{width:100%}}
+.heartPop{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none;z-index:6}
+.heartPop.go{animation:pop .7s ease-out}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
+/* sheet */
+.overlay{position:absolute;inset:0;background:rgba(10,8,7,.55);z-index:40;display:flex;align-items:flex-end;animation:fade .2s}
+.sheet{width:100%;background:#fff;border-radius:24px 24px 0 0;padding:10px 20px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;animation:up .25s ease-out;max-height:92%;overflow-y:auto}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.toast{position:absolute;left:50%;bottom:100px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:500;z-index:60;white-space:nowrap;animation:fade .2s}
+.bubble{background:#E3F6DE;border-radius:14px 14px 4px 14px;padding:12px 14px;font-size:14px;line-height:1.7;white-space:pre-line}
+input.field{height:48px;border-radius:12px;border:1px solid #D9D0C3;padding:0 14px;font-size:15px;background:#fff;width:100%}
+input.field:focus{outline:2px solid var(--accent);outline-offset:0}
+.demoTag{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:70;font-size:10px;font-weight:600;background:rgba(163,90,18,.95);color:#fff;padding:2px 8px;border-radius:8px;pointer-events:none;letter-spacing:.2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============ Demo data (placeholders, not real listings) ============ */
+const CITIES = ['كل المدن','نواكشوط','نواذيبو','كيفة','روصو','أطار'];
+
+const SHOPS = [
+  {id:'diyar', name:'ديار للمفروشات', letter:'د', bg:'#1F2A44', fg:'#E2B864', city:'نواكشوط', area:'كارفور توري', tags:'غرف نوم · صالونات · ديكور', products:46, followers:'18.4 ألف', reels:128, verified:true, inst:true},
+  {id:'anaqa', name:'بيت الأناقة', letter:'ب', bg:'#2F4A48', fg:'#fff', city:'نواكشوط', area:'تفرغ زينة', tags:'صالونات · ستائر', products:31, followers:'6.2 ألف', reels:54, verified:true, inst:false},
+  {id:'nour', name:'مفروشات النور', letter:'ن', bg:'#6B4E3D', fg:'#fff', city:'نواكشوط', area:'لكصر', tags:'غرف نوم · دواليب', products:58, followers:'9.7 ألف', reels:77, verified:false, inst:true},
+  {id:'reem', name:'صالونات الريم', letter:'ر', bg:'#4A3B5C', fg:'#fff', city:'نواكشوط', area:'عرفات', tags:'صالونات مغربية وأوروبية', products:22, followers:'3.1 ألف', reels:31, verified:false, inst:true},
+  {id:'shatee', name:'معرض الشاطئ للأثاث', letter:'ش', bg:'#2B4A6B', fg:'#fff', city:'نواذيبو', area:'', tags:'غرف نوم · مكاتب', products:27, followers:'2.4 ألف', reels:19, verified:true, inst:false},
+  {id:'rahma', name:'مفروشات الرحمة', letter:'ح', bg:'#5A4234', fg:'#fff', city:'نواذيبو', area:'', tags:'صالونات · سجاد', products:16, followers:'1.8 ألف', reels:12, verified:false, inst:true},
+  {id:'wafa', name:'أثاث الوفاء', letter:'و', bg:'#3E5A3A', fg:'#fff', city:'كيفة', area:'', tags:'غرف نوم · تسريحات', products:19, followers:'1.1 ألف', reels:9, verified:false, inst:true},
+  {id:'arous', name:'بيت العروس', letter:'ع', bg:'#7A3E4A', fg:'#fff', city:'روصو', area:'', tags:'أطقم العرائس', products:24, followers:'2.9 ألف', reels:22, verified:true, inst:false}
+];
+
+const PRODUCTS = [
+  {id:'p1', name:'طقم غرفة النوم «إسطنبول»', shop:'diyar', kind:'bed', price:295000, reel:true, inst:true, wall:'#3B3029', tone:'#8B5A3C', tone2:'#6B4E3D',
+   colors:[['بني جوزي','#6B4E3D'],['رمادي دافئ','#8C857C'],['كريمي','#D9CDBB']], parts:['سرير 180×200 سم','دولاب 6 أبواب','تسريحة مع مرآة','كومودينو × 2'],
+   caption:'طقم غرفة نوم تركي كامل: سرير، دولاب، تسريحة وكومودينو. التوصيل والتركيب داخل نواكشوط.', likes:2418, views:'24.1K'},
+  {id:'p2', name:'صالون أوروبي 7 مقاعد', shop:'anaqa', kind:'sofa', price:180000, reel:true, inst:false, wall:'#5B4A3C', tone:'#C9B79C', tone2:'#B09D80',
+   colors:[['بيج','#C9B79C'],['أزرق ملكي','#2B3A5C'],['رمادي','#8C857C']], parts:['كنبة 3 مقاعد','كنبة مقعدين','كرسيان منفردان','طاولة وسط'],
+   caption:'صالون أوروبي بقماش مقاوم للبقع، مناسب لصالة الضيوف. ألوان متعددة حسب الطلب.', likes:1290, views:'12.8K'},
+  {id:'p3', name:'تسريحة بمرآة دائرية', shop:'nour', kind:'vanity', price:52000, reel:true, inst:true, wall:'#4A3E35', tone:'#EDE6DA', tone2:'#D9CDBB',
+   colors:[['أبيض عاجي','#EDE6DA'],['بني','#6B4E3D']], parts:['تسريحة بدرجين','مرآة دائرية','كرسي مبطّن'],
+   caption:'تسريحة أرضية بمرآة دائرية وإطار ذهبي. الأكثر طلباً هذا الشهر.', likes:3150, views:'31.5K'},
+  {id:'p4', name:'دولاب 6 أبواب', shop:'nour', kind:'wardrobe', price:120000, reel:false, inst:true, wall:'#4B4038', tone:'#D9CDBB', tone2:'#8A6A3E',
+   colors:[['كريمي','#D9CDBB'],['رمادي','#8C857C']], parts:['6 أبواب','رفوف داخلية','قضيب تعليق'], caption:'', likes:0, views:''},
+  {id:'p5', name:'صالون مغربي كامل', shop:'reem', kind:'sofa', price:150000, reel:true, inst:true, wall:'#2F3A3A', tone:'#2B3A5C', tone2:'#22304D',
+   colors:[['أزرق','#2B3A5C'],['عنابي','#6E2A35']], parts:['جلسة على شكل U','وسائد ظهر','طاولة نحاسية'],
+   caption:'صالون مغربي تفصيل حسب مقاس غرفتك. القماش والتطريز من اختيارك.', likes:920, views:'9.2K'},
+  {id:'p6', name:'طقم غرفة نوم رمادي', shop:'shatee', kind:'bed', price:310000, reel:true, inst:false, wall:'#4B4038', tone:'#A7A099', tone2:'#8C857C',
+   colors:[['رمادي','#8C857C'],['أبيض','#E9E4DC']], parts:['سرير 180×200 سم','دولاب 4 أبواب','تسريحة','كومودينو × 2'],
+   caption:'طقم عصري بلون رمادي هادئ. التوصيل داخل نواذيبو.', likes:1500, views:'15.0K'},
+  {id:'p7', name:'تسريحة كلاسيك', shop:'wafa', kind:'vanity', price:48000, reel:false, inst:true, wall:'#3B3029', tone:'#6B4E3D', tone2:'#5A4234',
+   colors:[['بني','#6B4E3D']], parts:['تسريحة','مرآة','كرسي'], caption:'', likes:0, views:''},
+  {id:'p8', name:'دولاب بأبواب منزلقة', shop:'arous', kind:'wardrobe', price:135000, reel:true, inst:false, wall:'#3E3530', tone:'#8C857C', tone2:'#E2B864',
+   colors:[['رمادي','#8C857C'],['خشبي','#8A6A3E']], parts:['بابان منزلقان','مرآة كاملة','أدراج داخلية'],
+   caption:'دولاب بأبواب منزلقة ومرآة كاملة، يوفّر المساحة في الغرف الصغيرة.', likes:640, views:'6.4K'}
+];
+
+const CATS = [['all','الكل'],['bed','غرف نوم'],['sofa','صالونات'],['vanity','تسريحات'],['wardrobe','دواليب']];
+
+/* ============ State ============ */
+const S = {
+  stack:[{name:'reels'}],
+  city:'نواكشوط',
+  liked:{}, saved:{}, followed:{},
+  reelFeed:'for', reelCat:'all',
+  storesInst:false,
+  catalogCat:'all', catalogSort:0, cityMenu:false,
+  browseFilters:{inst:true},
+  color:{}, qty:1, district:'',
+  sheet:null
+};
+
+/* ============ Helpers ============ */
+const $app = document.getElementById('app');
+const shopById = id => SHOPS.find(s=>s.id===id);
+const prodById = id => PRODUCTS.find(p=>p.id===id);
+const fmt = n => n.toLocaleString('en-US');
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cur = () => S.stack[S.stack.length-1];
+const inCity = city => S.city==='كل المدن' || city===S.city;
+
+const I = {
+  back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
+  chev:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A8178" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>',
+  down:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
+  search:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  pin:(c='currentColor',s=14)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>`,
+  check:(c='currentColor',s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`,
+  verified:(fill='#A35A12',tick='#fff',s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" role="img" aria-label="موثّق" style="flex-shrink:0"><circle cx="12" cy="12" r="10" fill="${fill}"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="${tick}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  wa:(s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1 1 8.5 19z"/><path d="M9.2 9.2c.3 2.6 2.3 4.7 5 5.4l1-1.3-1.8-1-1 .8a3.6 3.6 0 0 1-1.8-1.8l.8-1-1-1.8z"/></svg>`,
+  phone:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/></svg>',
+  heart:(on,s=32)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${on?'#FF4D5E':'none'}" stroke="${on?'#FF4D5E':'currentColor'}" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`,
+  save:(on,s=30,c='currentColor',onc='#E2B864')=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${on?onc:'none'}" stroke="${on?onc:c}" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"/></svg>`,
+  share:(s=30)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5L4 11l6 6"/><path d="M4 11h10a6 6 0 0 1 6 6v2"/></svg>`,
+  play:(s=12)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>`,
+  plus:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#141110" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+  close:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  sort:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg>',
+  minus:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>',
+  add:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'
+};
+
+const NAV_ICONS = {
+  home:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>',
+  browse:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+  stores:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M4 9l1.5-5h13L20 9z"/><path d="M5 9v11h14V9"/><path d="M10 20v-5h4v5"/></svg>',
+  saved:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"/></svg>',
+  me:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>'
+};
+
+/* Furniture illustrations (stand-ins for real video/photos) */
+function roomArt(p, color, opts={}){
+  const head = color || p.tone2;
+  const cls = opts.kb ? 'class="kb"' : '';
+  const vb = opts.vb || '0 0 390 844';
+  const par = opts.slice ? 'xMidYMid slice' : 'xMidYMid slice';
+  let furniture = '';
+  if(p.kind==='bed'){
+    furniture = `
+      <rect x="92" y="352" width="206" height="218" rx="22" fill="${head}"/>
+      ${[126,161,195,229,264].map(x=>`<line x1="${x}" y1="374" x2="${x}" y2="560" stroke="#000" stroke-opacity=".16" stroke-width="2"/>`).join('')}
+      <rect x="18" y="520" width="58" height="76" rx="4" fill="#4E392D"/><line x1="18" y1="556" x2="76" y2="556" stroke="#3A2A21" stroke-width="2"/>
+      <rect x="314" y="520" width="58" height="76" rx="4" fill="#4E392D"/><line x1="314" y1="556" x2="372" y2="556" stroke="#3A2A21" stroke-width="2"/>
+      <rect x="112" y="496" width="78" height="46" rx="14" fill="#F4EFE8"/><rect x="200" y="496" width="78" height="46" rx="14" fill="#F4EFE8"/>
+      <rect x="80" y="532" width="230" height="34" rx="12" fill="#EFE8DE"/>
+      <path d="M80 556 H310 L340 720 H50 Z" fill="#E6DDD0"/><path d="M58 650 H332 L340 720 H50 Z" fill="${p.tone}"/>
+      <rect x="44" y="720" width="302" height="16" rx="4" fill="#5A4133"/>`;
+  } else if(p.kind==='sofa'){
+    const c = color || p.tone;
+    furniture = `
+      <rect x="120" y="300" width="150" height="104" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="4"/>
+      <rect x="136" y="316" width="118" height="72" fill="#fff" fill-opacity=".06"/>
+      <rect x="50" y="470" width="290" height="100" rx="24" fill="${c}"/>
+      <rect x="36" y="540" width="318" height="86" rx="20" fill="${c}"/>
+      <rect x="24" y="500" width="46" height="126" rx="16" fill="${p.tone2}"/>
+      <rect x="320" y="500" width="46" height="126" rx="16" fill="${p.tone2}"/>
+      <rect x="96" y="500" width="90" height="56" rx="14" fill="#fff" fill-opacity=".14"/><rect x="204" y="500" width="90" height="56" rx="14" fill="#fff" fill-opacity=".14"/>
+      <rect x="56" y="626" width="10" height="28" fill="#2A1F18"/><rect x="324" y="626" width="10" height="28" fill="#2A1F18"/>
+      <ellipse cx="195" cy="720" rx="90" ry="18" fill="#C9A46A" opacity=".8"/>`;
+  } else if(p.kind==='vanity'){
+    const c = color || p.tone;
+    furniture = `
+      <ellipse cx="195" cy="380" rx="78" ry="98" fill="#DCE3E6" stroke="#C9A46A" stroke-width="8"/>
+      <ellipse cx="175" cy="350" rx="18" ry="40" fill="#fff" opacity=".35"/>
+      <rect x="70" y="490" width="250" height="30" rx="6" fill="${c}"/>
+      <rect x="82" y="520" width="226" height="92" fill="${p.tone2}"/>
+      <line x1="195" y1="520" x2="195" y2="612" stroke="#000" stroke-opacity=".2" stroke-width="2"/>
+      <circle cx="175" cy="566" r="4" fill="#C9A46A"/><circle cx="215" cy="566" r="4" fill="#C9A46A"/>
+      <rect x="88" y="612" width="12" height="44" fill="#2A1F18"/><rect x="290" y="612" width="12" height="44" fill="#2A1F18"/>
+      <rect x="146" y="650" width="98" height="38" rx="12" fill="${c}"/>`;
+  } else {
+    const c = color || p.tone;
+    furniture = `
+      <rect x="70" y="250" width="250" height="400" rx="6" fill="${c}"/>
+      <line x1="153" y1="256" x2="153" y2="644" stroke="#000" stroke-opacity=".22" stroke-width="3"/>
+      <line x1="237" y1="256" x2="237" y2="644" stroke="#000" stroke-opacity=".22" stroke-width="3"/>
+      <rect x="141" y="430" width="6" height="34" fill="${p.tone2}"/><rect x="159" y="430" width="6" height="34" fill="${p.tone2}"/>
+      <rect x="225" y="430" width="6" height="34" fill="${p.tone2}"/><rect x="243" y="430" width="6" height="34" fill="${p.tone2}"/>
+      <rect x="64" y="650" width="262" height="14" rx="3" fill="#2A1F18"/>`;
+  }
+  return `<svg class="art" viewBox="${vb}" preserveAspectRatio="${par}" aria-hidden="true"><g ${cls}>
+    <rect width="390" height="844" fill="${p.wall}"/>
+    <rect x="30" y="200" width="330" height="370" rx="3" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="2"/>
+    <rect y="570" width="390" height="274" fill="#000" opacity=".3"/>
+    <circle cx="62" cy="380" r="72" fill="#F2C27B" opacity=".12"/><circle cx="328" cy="380" r="72" fill="#F2C27B" opacity=".12"/>
+    ${furniture}
+    <ellipse cx="195" cy="800" rx="190" ry="26" fill="#000" opacity=".22"/>
+  </g></svg>`;
+}
+function thumb(p, h=150){
+  return `<span style="position:relative;display:block;height:${h}px;overflow:hidden;background:${p.wall}">${roomArt(p,null,{vb:'0 230 390 540'})}</span>`;
+}
+function avatar(s, size=52, border=''){
+  return `<span class="avatar" style="width:${size}px;height:${size}px;background:${s.bg};color:${s.fg};font-size:${Math.round(size*.42)}px;${border}">${s.letter}</span>`;
+}
+function chipsHTML(items, activeId, action, variant=''){
+  return `<div class="chips">${items.map(([id,label])=>`<button class="chip ${variant} ${id===activeId?'on':''}" data-act="${action}" data-v="${esc(id)}" aria-pressed="${id===activeId}"><span>${esc(label)}</span></button>`).join('')}</div>`;
+}
+
+/* ============ Navigation ============ */
+function go(name, params={}){
+  S.stack.push({name, ...params});
+  history.pushState({d:S.stack.length}, '');
+  S.cityMenu=false;
+  render(true);
+}
+function tab(name){
+  S.stack=[{name}];
+  history.replaceState({d:1}, '');
+  S.cityMenu=false;
+  render(true);
+}
+function back(){
+  if(S.sheet){ S.sheet=null; render(); return; }
+  if(S.stack.length>1){ S.stack.pop(); render(true); }
+}
+window.addEventListener('popstate', ()=>{
+  if(S.sheet){ S.sheet=null; render(); return; }
+  if(S.stack.length>1){ S.stack.pop(); render(true); }
+});
+
+let toastTimer;
+function toast(msg){
+  clearTimeout(toastTimer);
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $app.appendChild(t);
+  toastTimer=setTimeout(()=>t.remove(),1800);
+}
+
+function tabbar(active, dark=false){
+  const items=[['reels','الرئيسية','home'],['browse','تصفّح','browse'],['stores','المتاجر','stores'],['saved','المحفوظات','saved'],['me','حسابي','me']];
+  return `<nav class="tabbar ${dark?'dark':''}" aria-label="التنقل الرئيسي">${items.map(([n,l,ic])=>`<button data-act="tab" data-v="${n}" class="${n===active?'on':''}" ${n===active?'aria-current="page"':''}>${NAV_ICONS[ic]}<span>${l}</span></button>`).join('')}</nav>`;
+}
+function header(title, extra=''){
+  return `<div class="row" style="padding:calc(10px + env(safe-area-inset-top)) 12px 4px;gap:6px">
+    <button class="iconBtn" data-act="back" aria-label="رجوع">${I.back}</button>
+    <h1 class="h1" style="font-size:20px;flex:1">${title}</h1>${extra}</div>`;
+}
+
+/* ============ Screens ============ */
+function reelsScreen(){
+  let list = PRODUCTS.filter(p=>p.reel && inCity(shopById(p.shop).city));
+  if(S.reelCat!=='all') list = list.filter(p=>p.kind===S.reelCat);
+  if(S.reelFeed==='following') list = list.filter(p=>S.followed[p.shop]);
+  const top = `<div class="reelTop">
+    <div style="display:grid;grid-template-columns:44px 1fr 44px;align-items:center">
+      <button class="iconBtn" data-act="cityMenu" aria-label="المدينة: ${esc(S.city)}" style="color:#fff">${I.pin('#fff',20)}</button>
+      <div class="row" style="justify-content:center;gap:22px;font-size:16px">
+        <button data-act="feed" data-v="following" style="color:${S.reelFeed==='following'?'#fff':'rgba(255,255,255,.75)'};font-weight:${S.reelFeed==='following'?700:500};padding:8px 0;border-bottom:2px solid ${S.reelFeed==='following'?'#fff':'transparent'}">المتابَعون</button>
+        <button data-act="feed" data-v="for" style="color:${S.reelFeed==='for'?'#fff':'rgba(255,255,255,.75)'};font-weight:${S.reelFeed==='for'?700:500};padding:8px 0;border-bottom:2px solid ${S.reelFeed==='for'?'#fff':'transparent'}">لك</button>
+      </div>
+      <button class="iconBtn" data-act="go" data-v="catalog" aria-label="بحث" style="color:#fff">${I.search}</button>
+    </div>
+    ${chipsHTML(CATS, S.reelCat, 'reelCat', 'dark')}
+  </div>`;
+  const empty = !list.length ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff;padding:32px;text-align:center">
+      <div style="font-size:17px;font-weight:600">${S.reelFeed==='following'?'لم تتابع أي متجر بعد':'لا توجد ريلز بهذه الفلاتر في '+esc(S.city)}</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.7)">${S.reelFeed==='following'?'تابع المتاجر لترى ريلزها هنا':'جرّب مدينة أو قسماً آخر'}</div>
+      <button class="btn accent" data-act="${S.reelFeed==='following'?'tab':'setCity'}" data-v="${S.reelFeed==='following'?'stores':'كل المدن'}" style="padding:0 20px;margin-top:8px">${S.reelFeed==='following'?'تصفّح المتاجر':'عرض كل المدن'}</button>
+    </div>` : '';
+  const reels = list.map(p=>{
+    const s=shopById(p.shop), liked=!!S.liked[p.id], saved=!!S.saved[p.id], fol=!!S.followed[p.shop];
+    return `<section class="reel" data-reel="${p.id}" aria-label="ريل ${esc(p.name)}">
+      ${roomArt(p,null,{kb:true})}
+      <div class="scrim"></div>
+      <div class="heartPop">${I.heart(true,110)}</div>
+      <div class="side">
+        <div style="position:relative;width:52px;height:64px">
+          <button data-act="shop" data-v="${s.id}" aria-label="صفحة ${esc(s.name)}">${avatar(s,52,'border:2px solid #fff')}</button>
+          <button data-act="follow" data-v="${s.id}" aria-label="${fol?'إلغاء المتابعة':'متابعة المتجر'}" style="position:absolute;bottom:0;left:14px;width:24px;height:24px;min-height:0;border-radius:12px;background:${fol?'#fff':'#E2B864'};display:flex;align-items:center;justify-content:center">${fol?I.check('#141110',14):I.plus}</button>
+        </div>
+        <button data-act="like" data-v="${p.id}" aria-label="إعجاب" aria-pressed="${liked}">${I.heart(liked)}<span>${fmt(p.likes+(liked?1:0))}</span></button>
+        <button data-act="save" data-v="${p.id}" aria-label="حفظ" aria-pressed="${saved}">${I.save(saved)}<span>حفظ</span></button>
+        <button data-act="share" data-v="${p.id}" aria-label="مشاركة">${I.share()}<span>مشاركة</span></button>
+      </div>
+      <div class="caption">
+        <button data-act="shop" data-v="${s.id}" class="row" style="gap:6px;font-size:16px;font-weight:700;color:#fff;justify-content:flex-start">
+          <span>${esc(s.name)}</span>${s.verified?I.verified('#E2B864','#141110',16):''}
+          <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,.8)">· ${esc(s.city)}</span>
+        </button>
+        <p style="margin:0;font-size:14px;line-height:1.6;color:rgba(255,255,255,.92)">${esc(p.caption)}</p>
+      </div>
+      <div class="productBar">
+        <button data-act="product" data-v="${p.id}" class="row" style="gap:10px;flex:1;min-width:0;color:#fff;text-align:right">
+          <span style="width:52px;height:52px;border-radius:10px;overflow:hidden;flex-shrink:0;position:relative">${roomArt(p,null,{vb:'40 300 310 420'})}</span>
+          <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+            <span class="ellipsis" style="font-size:14px;font-weight:600">${esc(p.name)}</span>
+            <span style="font-size:15px;font-weight:700;color:#F2C27B">${fmt(p.price)} أوقية</span>
+          </span>
+        </button>
+        <button data-act="order" data-v="${p.id}" class="btn wa" style="height:44px;padding:0 14px;font-size:14px;flex-shrink:0">${I.wa()}<span>اطلب</span></button>
+      </div>
+      <div class="progress"><i></i></div>
+    </section>`;
+  }).join('');
+  return `<div class="screen noNav" style="background:var(--dark)">
+    <div class="reels" id="reels">${reels}</div>${empty}${top}${cityMenuHTML(true)}
+  </div>${tabbar('reels',true)}`;
+}
+
+function cityMenuHTML(dark=false){
+  if(!S.cityMenu) return '';
+  return `<div data-act="closeMenu" style="position:absolute;inset:0;z-index:30"></div>
+  <div role="listbox" aria-label="اختر المدينة" style="position:absolute;top:calc(58px + env(safe-area-inset-top));${dark?'right':'left'}:16px;width:200px;background:#fff;color:var(--ink);border-radius:14px;border:1px solid var(--line);box-shadow:0 12px 32px rgba(0,0,0,.25);padding:6px;z-index:31">
+    ${CITIES.map(c=>`<button role="option" aria-selected="${c===S.city}" data-act="setCity" data-v="${c}" class="row" style="width:100%;height:44px;border-radius:10px;padding:0 12px;justify-content:space-between;font-size:14px;background:${c===S.city?'#F6EFE5':'#fff'}"><span>${c}</span>${c===S.city?I.check('#A35A12'):''}</button>`).join('')}
+  </div>`;
+}
+
+function productScreen(id){
+  const p=prodById(id), s=shopById(p.shop), ci=S.color[id]||0, saved=!!S.saved[id];
+  return `<div class="screen noNav" style="padding-bottom:96px">
+    <div style="position:relative;height:340px;background:${p.wall};overflow:hidden">
+      ${roomArt(p,p.colors[ci][1],{vb:'0 250 390 480'})}
+      <div class="row" style="position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;left:12px;justify-content:space-between">
+        <button class="iconBtn light" data-act="back" aria-label="رجوع">${I.back}</button>
+        <div class="row">
+          <button class="iconBtn light" data-act="save" data-v="${id}" aria-label="حفظ" aria-pressed="${saved}">${I.save(saved,20,'#1C1916','#A35A12')}</button>
+          <button class="iconBtn light" data-act="share" data-v="${id}" aria-label="مشاركة">${I.share(20)}</button>
+        </div>
+      </div>
+      ${p.reel?`<button data-act="watch" data-v="${id}" class="row" style="position:absolute;bottom:12px;right:12px;height:36px;padding:0 14px;border-radius:18px;background:rgba(20,17,16,.78);color:#fff;font-size:13px;font-weight:600;gap:6px">${I.play(14)}<span>شاهد الريل</span></button>`:''}
+      <span style="position:absolute;bottom:16px;left:12px;height:28px;padding:0 10px;border-radius:14px;background:rgba(20,17,16,.7);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center">1 / 5</span>
+    </div>
+    <div class="pad" style="display:flex;flex-direction:column;gap:16px">
+      <button data-act="shop" data-v="${s.id}" class="row" style="font-size:14px;font-weight:600;justify-content:flex-start">
+        ${avatar(s,32)}<span>${esc(s.name)}</span>${s.verified?I.verified('#A35A12','#fff',15):''}<span class="muted" style="font-weight:500">· ${esc(s.city)}</span>
+      </button>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <h1 class="h1" style="font-size:22px;line-height:1.35">${esc(p.name)}</h1>
+        <div class="row" style="align-items:baseline"><span style="font-size:24px;font-weight:700;color:var(--price)">${fmt(p.price)} أوقية</span><span class="muted" style="font-size:13px">شامل التوصيل والتركيب</span></div>
+      </div>
+      <div class="row" style="flex-wrap:wrap">
+        <span style="height:30px;padding:0 12px;border-radius:15px;background:var(--chip);font-size:13px;display:flex;align-items:center">توصيل وتركيب</span>
+        ${p.inst?'<span style="height:30px;padding:0 12px;border-radius:15px;background:#E4F1E8;color:#0B5E33;font-size:13px;font-weight:600;display:flex;align-items:center">تقسيط متاح</span>':''}
+        <span style="height:30px;padding:0 12px;border-radius:15px;background:var(--chip);font-size:13px;display:flex;align-items:center">صناعة تركية</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:14px;font-weight:600">اللون: <span class="muted" style="font-weight:500">${esc(p.colors[ci][0])}</span></div>
+        <div class="row" style="gap:4px">${p.colors.map((c,i)=>`<button data-act="color" data-v="${id}|${i}" aria-label="${esc(c[0])}" aria-pressed="${i===ci}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center">
+          <span style="width:${i===ci?40:32}px;height:${i===ci?40:32}px;border-radius:50%;border:${i===ci?'2px solid #1C1916':'1px solid rgba(0,0,0,.12)'};display:flex;align-items:center;justify-content:center">
+            <span style="width:${i===ci?30:32}px;height:${i===ci?30:32}px;border-radius:50%;background:${c[1]}"></span></span></button>`).join('')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:14px;font-weight:600">مكونات الطقم</div>
+        <div class="grid2" style="gap:8px 12px;font-size:14px">${p.parts.map(x=>`<div class="row" style="gap:6px">${I.check('#0F7A43')}<span>${esc(x)}</span></div>`).join('')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row" style="justify-content:space-between"><h2 class="h2">من نفس المتجر</h2><button data-act="shop" data-v="${s.id}" style="font-size:13px;font-weight:600;color:var(--price);min-height:32px">عرض المتجر</button></div>
+        <div class="grid3">${PRODUCTS.filter(x=>x.shop===s.id && x.id!==id).concat(PRODUCTS.filter(x=>x.shop!==s.id && x.kind===p.kind && x.id!==id)).slice(0,3).map(x=>`<button data-act="product" data-v="${x.id}" style="border-radius:10px;overflow:hidden;display:block;text-align:right">${thumb(x,110)}</button>`).join('')}</div>
+      </div>
+    </div>
+    <div class="row" style="position:absolute;right:0;left:0;bottom:0;padding:12px 16px calc(16px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);gap:10px;z-index:10">
+      <button class="btn wa" data-act="order" data-v="${id}" style="flex:1;height:52px;font-size:16px">${I.wa(22)}<span>اطلب عبر واتساب</span></button>
+      <button class="iconBtn" data-act="call" data-v="${s.id}" aria-label="اتصال بالمتجر" style="width:52px;height:52px;border-radius:14px;border:1.5px solid #D9D0C3">${I.phone}</button>
+    </div>
+  </div>`;
+}
+
+function orderSheet(id){
+  const p=prodById(id), s=shopById(p.shop), ci=S.color[id]||0, total=fmt(p.price*S.qty);
+  let msg=`السلام عليكم، رأيت هذا المنتج على التطبيق وأريد طلبه:\n${p.name}\nاللون: ${p.colors[ci][0]} — الكمية: ${S.qty}\nالسعر المعروض: ${total} أوقية`;
+  if(S.district.trim()) msg+=`\nالحي: ${S.district.trim()}`;
+  msg+='\n[رابط المنتج]';
+  return `<div class="overlay" data-act="closeSheet">
+  <div class="sheet" role="dialog" aria-labelledby="st" data-stop="1">
+    <div style="align-self:center;width:40px;height:4px;border-radius:2px;background:#DDD5CA"></div>
+    <div class="row" style="align-items:flex-start;justify-content:space-between;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <h2 id="st" style="margin:0;font-size:19px;font-weight:700">إرسال الطلب عبر واتساب</h2>
+        <p class="muted" style="margin:0;font-size:13px;line-height:1.6">لا دفع داخل التطبيق. يصل طلبك للمتجر وتتفقان مباشرة على الدفع والتوصيل.</p>
+      </div>
+      <button class="iconBtn" data-act="closeSheet" aria-label="إغلاق" style="background:#F3EEE7">${I.close}</button>
+    </div>
+    <div class="row card" style="gap:12px;padding:10px;background:#FAF7F2">
+      <span style="width:56px;height:56px;border-radius:10px;overflow:hidden;flex-shrink:0;position:relative">${roomArt(p,p.colors[ci][1],{vb:'40 300 310 420'})}</span>
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+        <span class="ellipsis" style="font-size:15px;font-weight:600">${esc(p.name)}</span>
+        <span class="muted" style="font-size:13px">${esc(s.name)} · ${esc(p.colors[ci][0])}</span>
+        <span style="font-size:15px;font-weight:700;color:var(--price)" id="total">${total} أوقية</span>
+      </div>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <span style="font-size:15px;font-weight:600">الكمية</span>
+      <div class="row" style="gap:4px;border:1px solid #E2DACE;border-radius:14px;padding:2px">
+        <button data-act="qty" data-v="1" aria-label="زيادة" style="width:44px;height:40px;display:flex;align-items:center;justify-content:center">${I.add}</button>
+        <span style="min-width:24px;text-align:center;font-size:16px;font-weight:700">${S.qty}</span>
+        <button data-act="qty" data-v="-1" aria-label="إنقاص" style="width:44px;height:40px;display:flex;align-items:center;justify-content:center">${I.minus}</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label for="district" style="font-size:15px;font-weight:600">الحي <span class="muted" style="font-weight:400;font-size:13px">(اختياري، لتقدير التوصيل)</span></label>
+      <input id="district" class="field" type="text" value="${esc(S.district)}" placeholder="مثال: تفرغ زينة" autocomplete="off">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="muted" style="font-size:13px;font-weight:600">الرسالة التي ستصل للمتجر</span>
+      <div class="bubble" id="bubble">${esc(msg)}</div>
+    </div>
+    <button class="btn wa" data-act="sendWA" data-v="${id}" style="height:54px;font-size:16px">${I.wa(22)}<span>افتح واتساب وأرسل</span></button>
+    <button data-act="call" data-v="${s.id}" style="align-self:center;min-height:44px;font-size:14px;font-weight:600;text-decoration:underline">أو اتصل بالمتجر مباشرة</button>
+  </div></div>`;
+}
+
+function shopScreen(id){
+  const s=shopById(id), fol=!!S.followed[id], t=S.shopTab||0;
+  const items=PRODUCTS.filter(p=>p.shop===id);
+  const reelList = items.filter(p=>p.reel);
+  const shown = t===0 ? (reelList.length?reelList:items) : items;
+  return `<div class="screen noNav">
+    <div style="position:relative;height:140px;background:#2B221C;overflow:hidden">
+      <svg viewBox="0 0 390 140" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">
+        <rect width="390" height="140" fill="#2B221C"/><rect x="16" y="20" width="110" height="104" fill="none" stroke="#3E3129" stroke-width="2"/>
+        <rect x="140" y="20" width="110" height="104" fill="none" stroke="#3E3129" stroke-width="2"/><rect x="264" y="20" width="110" height="104" fill="none" stroke="#3E3129" stroke-width="2"/>
+        <circle cx="195" cy="40" r="60" fill="#E2B864" opacity=".08"/></svg>
+      <button class="iconBtn light" data-act="back" aria-label="رجوع" style="position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px">${I.back}</button>
+    </div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:12px">
+      <div class="row" style="align-items:flex-end;gap:12px;margin-top:-42px">
+        ${avatar(s,84,'border:4px solid #FAF7F2')}
+        <div style="display:flex;flex-direction:column;gap:2px;padding-bottom:4px;min-width:0">
+          <div class="row" style="gap:6px"><h1 class="h1 ellipsis" style="font-size:20px">${esc(s.name)}</h1>${s.verified?I.verified('#A35A12','#fff',18):''}</div>
+          <span class="muted" style="font-size:13px">${esc(s.tags)}</span>
+        </div>
+      </div>
+      <div class="row muted" style="gap:6px;font-size:13px">${I.pin('#6B635A',16)}<span>${esc(s.area?s.area+'، '+s.city:s.city)} · المعرض مفتوح من 9 صباحاً</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));text-align:center">
+        <div style="display:flex;flex-direction:column"><span style="font-size:17px;font-weight:700">${s.reels}</span><span class="muted" style="font-size:12px">ريل</span></div>
+        <div style="display:flex;flex-direction:column"><span style="font-size:17px;font-weight:700">${s.followers}</span><span class="muted" style="font-size:12px">متابع</span></div>
+        <div style="display:flex;flex-direction:column"><span style="font-size:17px;font-weight:700">${s.products}</span><span class="muted" style="font-size:12px">منتج</span></div>
+      </div>
+      <div class="row">
+        <button class="btn ${fol?'ghost':'accent'}" data-act="follow" data-v="${id}" style="flex:1;height:44px;border-radius:12px">${fol?'تتابعه':'متابعة'}</button>
+        <button class="btn wa" data-act="waShop" data-v="${id}" style="flex:1;height:44px;border-radius:12px">${I.wa(18)}<span>واتساب</span></button>
+        <button class="iconBtn" data-act="call" data-v="${id}" aria-label="اتصال" style="border-radius:12px;border:1.5px solid #D9D0C3">${I.phone}</button>
+      </div>
+      <div role="tablist" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--line)">
+        ${['ريلز','المنتجات','العروض'].map((l,i)=>`<button role="tab" aria-selected="${i===t}" data-act="shopTab" data-v="${i}" style="height:44px;font-size:15px;font-weight:${i===t?700:500};color:${i===t?'var(--ink)':'var(--muted)'};border-bottom:2px solid ${i===t?'var(--ink)':'transparent'};margin-bottom:-1px">${l}</button>`).join('')}
+      </div>
+    </div>
+    ${t===2?`<div class="pad"><div class="card" style="padding:28px 16px;text-align:center;font-size:14px;color:var(--muted);border-style:dashed">لا توجد عروض حالياً</div></div>`:
+    t===0?`<div style="padding:6px 16px 16px" class="grid3">${shown.map(p=>`<button data-act="${p.reel?'watch':'product'}" data-v="${p.id}" style="position:relative;height:180px;border-radius:8px;overflow:hidden;display:block">${roomArt(p,null,{vb:'20 260 350 560'})}
+        <span style="position:absolute;top:6px;right:6px;height:22px;padding:0 7px;border-radius:11px;background:rgba(20,17,16,.78);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center">${fmt(p.price)}</span>
+        ${p.reel?`<span class="row" style="position:absolute;bottom:6px;right:6px;gap:3px;color:#fff;font-size:12px;font-weight:600">${I.play()}<span>${p.views}</span></span>`:''}</button>`).join('')}</div>`:
+    `<div style="padding:6px 16px 16px" class="grid2">${shown.map(productCard).join('')}</div>`}
+  </div>`;
+}
+
+function productCard(p){
+  const s=shopById(p.shop);
+  return `<button data-act="product" data-v="${p.id}" class="card" style="display:flex;flex-direction:column;overflow:hidden;text-align:right;border-radius:14px">
+    <span style="position:relative;display:block">${thumb(p,150)}
+      ${p.reel?`<span class="row" style="position:absolute;top:8px;right:8px;height:22px;padding:0 7px;border-radius:11px;background:rgba(20,17,16,.78);color:#fff;font-size:11px;font-weight:600;gap:3px">${I.play(10)}<span>ريل</span></span>`:''}
+      ${p.inst?'<span class="badge" style="position:absolute;bottom:8px;right:8px">تقسيط</span>':''}
+    </span>
+    <span style="display:flex;flex-direction:column;gap:2px;padding:8px 10px 10px;min-width:0">
+      <span class="ellipsis" style="font-size:14px;font-weight:600">${esc(p.name)}</span>
+      <span class="ellipsis muted" style="font-size:12px">${esc(s.name)} · ${esc(s.city)}</span>
+      <span style="font-size:15px;font-weight:700;color:var(--price)">${fmt(p.price)} أوقية</span>
+    </span></button>`;
+}
+
+function browseScreen(){
+  const f=S.browseFilters;
+  const filters=[['price','السعر'],['area','الحي'],['inst','تقسيط متاح'],['delivery','توصيل وتركيب']];
+  const cats=[['bed','غرف نوم','<path d="M3 18v-7h18v7M3 14h18M6 11V7h12v4M3 18v2M21 18v2"/>'],['sofa','صالونات','<path d="M5 10V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 12a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z"/><path d="M5 17v2M19 17v2"/>'],
+    ['vanity','تسريحات','<ellipse cx="12" cy="7" rx="4" ry="4.5"/><path d="M5 13h14v6H5zM12 13v6"/>'],['wardrobe','دواليب','<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M12 3v18M10 12h.01M14 12h.01"/>'],
+    ['all','سجاد وستائر','<path d="M3 4h18"/><path d="M6 4v16c1.5-1 2.5-1 4 0V4"/><path d="M14 4v16c1.5-1 2.5-1 4 0V4"/>'],['all','إنارة وديكور','<path d="M8 3h8l3 8H5z"/><path d="M12 11v8M8 21h8"/>']];
+  const featured = SHOPS.filter(s=>inCity(s.city)).slice(0,4);
+  const trending = PRODUCTS.filter(p=>p.reel && inCity(shopById(p.shop).city)).slice(0,3);
+  return `<div class="screen"><div class="pad" style="padding-top:calc(16px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:14px">
+    <div class="row" style="justify-content:space-between">
+      <h1 class="h1">تصفّح</h1>
+      <button data-act="cityMenu" class="row" style="height:40px;padding:0 12px;border-radius:20px;border:1px solid #DDD5CA;background:#fff;gap:4px;font-size:13px;font-weight:600">${I.pin('#A35A12',15)}<span>${esc(S.city)}</span>${I.down}</button>
+    </div>
+    <button data-act="go" data-v="catalog" class="row" style="height:48px;border-radius:14px;border:1px solid #E2DACE;background:#fff;padding:0 14px;gap:8px;color:#8A8178;font-size:15px">${I.search}<span>ابحث عن غرفة نوم، صالون، متجر…</span></button>
+    <div class="chips" style="margin-top:-6px">${filters.map(([id,l])=>`<button class="chip ${f[id]?'on':''}" data-act="bfilter" data-v="${id}" aria-pressed="${!!f[id]}"><span>${l}</span></button>`).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="row" style="justify-content:space-between"><h2 class="h2">الأقسام</h2><button data-act="catalogCat" data-v="all" style="font-size:13px;font-weight:600;color:var(--price);min-height:32px">كل المنتجات</button></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">${cats.map(([id,l,ic])=>`<button data-act="catalogCat" data-v="${id}" class="card" style="height:84px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:600"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A35A12" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg><span>${l}</span></button>`).join('')}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="row" style="justify-content:space-between"><h2 class="h2">متاجر مميزة</h2><button data-act="tab" data-v="stores" style="font-size:13px;font-weight:600;color:var(--price);min-height:32px">عرض الكل</button></div>
+      <div class="row" style="gap:12px;overflow-x:auto;scrollbar-width:none">${featured.map(s=>`<button data-act="shop" data-v="${s.id}" style="width:74px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:500;text-align:center">${avatar(s,56,s.verified?'outline:2px solid #A35A12;outline-offset:2px':'')}<span class="ellipsis" style="max-width:74px">${esc(s.name.replace('مفروشات ','').replace(' للمفروشات',''))}</span></button>`).join('') || '<span class="muted" style="font-size:14px">لا توجد متاجر في هذه المدينة بعد</span>'}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h2 class="h2">رائج هذا الأسبوع</h2>
+      <div class="grid3">${trending.map(p=>`<button data-act="watch" data-v="${p.id}" style="position:relative;height:160px;border-radius:10px;overflow:hidden;display:block">${roomArt(p,null,{vb:'20 260 350 560'})}<span class="row" style="position:absolute;bottom:6px;right:6px;gap:3px;color:#fff;font-size:12px;font-weight:600">${I.play()}<span>${p.views}</span></span></button>`).join('')}</div>
+    </div>
+  </div>${cityMenuHTML()}</div>${tabbar('browse')}`;
+}
+
+function storesScreen(){
+  const list=SHOPS.filter(s=>inCity(s.city)).filter(s=>!S.storesInst||s.inst);
+  return `<div class="screen"><div class="pad" style="padding-top:calc(16px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:10px">
+    <div class="row" style="justify-content:space-between"><h1 class="h1">المتاجر</h1>
+      <button class="iconBtn outline" data-act="go" data-v="catalog" aria-label="بحث">${I.search}</button></div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span class="muted" style="font-size:13px;font-weight:600">المدينة</span>
+      <div class="chips">${CITIES.map(c=>`<button class="chip ${c===S.city?'on':''}" data-act="setCity" data-v="${c}" aria-pressed="${c===S.city}"><span>${c===S.city?I.pin('#fff'):''}${c}</span></button>`).join('')}</div>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <span style="font-size:14px;font-weight:600">${list.length} متجر · ${esc(S.city)}</span>
+      <button data-act="storesInst" aria-pressed="${S.storesInst}" class="row" style="height:36px;padding:0 12px;border-radius:10px;gap:4px;font-size:13px;font-weight:600;${S.storesInst?'background:#0F7A43;color:#fff':'border:1px solid #DDD5CA;background:#fff'}">${S.storesInst?I.check('#fff',14):''}<span>يقبل التقسيط</span></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${list.map(s=>`<button data-act="shop" data-v="${s.id}" class="card row" style="gap:12px;padding:12px;text-align:right;width:100%">
+        ${avatar(s,56)}
+        <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+          <span class="row" style="gap:5px"><span class="ellipsis" style="font-size:15px;font-weight:700">${esc(s.name)}</span>${s.verified?I.verified('#A35A12','#fff',15):''}</span>
+          <span class="ellipsis muted" style="font-size:13px">${esc(s.tags)}</span>
+          <span class="row muted" style="gap:8px;font-size:12px;flex-wrap:wrap"><span class="row" style="gap:3px">${I.pin('#6B635A',13)}<span>${esc(s.area?s.area+'، '+s.city:s.city)}</span></span><span>· ${s.products} منتج</span>${s.inst?'<span class="badge">تقسيط</span>':''}</span>
+        </span>${I.chev}</button>`).join('')}
+      ${!list.length?'<div class="card" style="padding:32px 16px;text-align:center;font-size:14px;color:var(--muted);border-style:dashed">لا توجد متاجر مسجّلة في هذه المدينة بعد</div>':''}
+    </div>
+  </div></div>${tabbar('stores')}`;
+}
+
+function catalogScreen(){
+  const sorts=['الأحدث','الأقل سعراً','الأعلى سعراً'];
+  let items=PRODUCTS.filter(p=>inCity(shopById(p.shop).city)).filter(p=>S.catalogCat==='all'||p.kind===S.catalogCat);
+  if(S.q) items=items.filter(p=>(p.name+shopById(p.shop).name).includes(S.q));
+  if(S.catalogSort===1) items=[...items].sort((a,b)=>a.price-b.price);
+  if(S.catalogSort===2) items=[...items].sort((a,b)=>b.price-a.price);
+  return `<div class="screen">
+    ${header('كل المنتجات', `<button data-act="cityMenu" class="row" style="height:40px;padding:0 12px;border-radius:20px;border:1px solid #DDD5CA;background:#fff;gap:4px;font-size:13px;font-weight:600">${I.pin('#A35A12',15)}<span>${esc(S.city)}</span>${I.down}</button>`)}
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:6px">
+      <div style="position:relative">
+        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">ابحث</label>
+        <input id="q" class="field" type="search" value="${esc(S.q||'')}" placeholder="ابحث في المنتجات والمتاجر…" style="padding-right:44px" autocomplete="off">
+        <span style="position:absolute;top:13px;right:14px;color:#6B635A">${I.search}</span>
+      </div>
+      ${chipsHTML(CATS, S.catalogCat, 'catalogCatSet', 'accent')}
+      <div class="row" style="justify-content:space-between">
+        <span class="muted" style="font-size:13px;font-weight:600">${items.length} منتج</span>
+        <button data-act="sort" class="row" style="height:36px;padding:0 6px;gap:4px;font-size:13px;font-weight:600">${I.sort}<span>${sorts[S.catalogSort]}</span></button>
+      </div>
+    </div>
+    <div class="grid2" style="padding:4px 16px 16px">${items.map(productCard).join('')}</div>
+    ${!items.length?`<div class="card" style="margin:0 16px;padding:32px 16px;text-align:center;font-size:14px;color:var(--muted);border-style:dashed">لا توجد منتجات بهذه الفلاتر في ${esc(S.city)}</div>`:''}
+    ${cityMenuHTML()}
+  </div>${tabbar('browse')}`;
+}
+
+function savedScreen(){
+  const items=PRODUCTS.filter(p=>S.saved[p.id]);
+  return `<div class="screen"><div class="pad" style="padding-top:calc(16px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:12px">
+    <h1 class="h1">المحفوظات</h1>
+    ${items.length?`<div class="grid2">${items.map(productCard).join('')}</div>`:
+    `<div class="card" style="padding:40px 20px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;border-style:dashed">
+      <span style="color:#A35A12">${I.save(false,36,'#A35A12')}</span>
+      <div style="font-size:16px;font-weight:600">لا شيء محفوظ بعد</div>
+      <div class="muted" style="font-size:14px">اضغط «حفظ» على أي ريل أو منتج ليظهر هنا</div>
+      <button class="btn accent" data-act="tab" data-v="reels" style="padding:0 20px;margin-top:6px">شاهد الريلز</button></div>`}
+  </div></div>${tabbar('saved')}`;
+}
+
+function meScreen(){
+  const n=Object.values(S.followed).filter(Boolean).length;
+  return `<div class="screen"><div class="pad" style="padding-top:calc(16px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:12px">
+    <h1 class="h1">حسابي</h1>
+    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:15px;font-weight:600">التصفّح بدون حساب</div>
+      <div class="muted" style="font-size:14px;line-height:1.6">في هذه النسخة لا يحتاج الزبون حساباً: يتصفح ويطلب عبر واتساب مباشرة.</div>
+    </div>
+    ${[['مدينتي',S.city,'cityMenu'],['المتاجر التي أتابعها',n+' متجر','tab|stores'],['اللغة','العربية',''],['هل لديك متجر مفروشات؟','انضم كتاجر','']].map(([a,b,act])=>`<button ${act?`data-act="${act.split('|')[0]}" data-v="${act.split('|')[1]||''}"`:'data-act="soon"'} class="card row" style="justify-content:space-between;padding:0 16px;height:56px;width:100%;font-size:15px"><span style="font-weight:600">${a}</span><span class="row muted" style="font-size:14px">${esc(b)}${I.chev}</span></button>`).join('')}
+    <div class="muted" style="font-size:12px;text-align:center;margin-top:8px">نموذج تجريبي لتجربة الاستخدام فقط · البيانات والأسعار أمثلة</div>
+  </div>${cityMenuHTML()}</div>${tabbar('me')}`;
+}
+
+/* ============ Render ============ */
+let reelObserver;
+function render(resetScroll){
+  const c=cur();
+  const prevScroll = !resetScroll && document.querySelector('.screen') ? document.querySelector('.screen').scrollTop : 0;
+  const prevReel = !resetScroll && document.getElementById('reels') ? document.getElementById('reels').scrollTop : 0;
+  let html='';
+  switch(c.name){
+    case 'reels': html=reelsScreen(); break;
+    case 'product': html=productScreen(c.id); break;
+    case 'shop': html=shopScreen(c.id); break;
+    case 'browse': html=browseScreen(); break;
+    case 'stores': html=storesScreen(); break;
+    case 'catalog': html=catalogScreen(); break;
+    case 'saved': html=savedScreen(); break;
+    case 'me': html=meScreen(); break;
+    case 'watch': html=watchScreen(c.id); break;
+  }
+  if(S.sheet) html+=orderSheet(S.sheet);
+  $app.innerHTML=html;
+  const sc=document.querySelector('.screen'); if(sc) sc.scrollTop=prevScroll;
+  const rl=document.getElementById('reels');
+  if(rl){
+    rl.scrollTop = c.startAt!=null && resetScroll ? c.startAt*rl.clientHeight : prevReel;
+    setupReels(rl);
+  }
+  const d=document.getElementById('district');
+  if(d) d.addEventListener('input',e=>{S.district=e.target.value; updateBubble();});
+  const q=document.getElementById('q');
+  if(q){ q.addEventListener('input',e=>{S.q=e.target.value; clearTimeout(q._t); q._t=setTimeout(()=>{const pos=q.selectionStart; render(); const nq=document.getElementById('q'); nq.focus(); try{nq.setSelectionRange(pos,pos);}catch(_){} },250);}); }
+}
+function updateBubble(){
+  const id=S.sheet, p=prodById(id), ci=S.color[id]||0, total=fmt(p.price*S.qty);
+  let msg=`السلام عليكم، رأيت هذا المنتج على التطبيق وأريد طلبه:\n${p.name}\nاللون: ${p.colors[ci][0]} — الكمية: ${S.qty}\nالسعر المعروض: ${total} أوقية`;
+  if(S.district.trim()) msg+=`\nالحي: ${S.district.trim()}`;
+  msg+='\n[رابط المنتج]';
+  document.getElementById('bubble').textContent=msg;
+}
+function watchScreen(id){
+  // single-product reel opened from product/shop; reuse feed but start at that product
+  return reelsScreen();
+}
+function setupReels(rl){
+  if(reelObserver) reelObserver.disconnect();
+  reelObserver=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('playing',e.isIntersecting && e.intersectionRatio>.6)),{root:rl,threshold:[.6]});
+  rl.querySelectorAll('.reel').forEach(r=>{
+    reelObserver.observe(r);
+    let last=0;
+    r.addEventListener('click',e=>{
+      if(e.target.closest('button')) return;
+      const now=Date.now();
+      if(now-last<300){ const id=r.dataset.reel; if(!S.liked[id]){S.liked[id]=true; updateLike(r,id);} const h=r.querySelector('.heartPop'); h.classList.remove('go'); void h.offsetWidth; h.classList.add('go'); }
+      last=now;
+    });
+  });
+}
+function updateLike(r,id){
+  const b=r.querySelector('[data-act="like"]'); const p=prodById(id);
+  b.innerHTML=I.heart(!!S.liked[id])+`<span>${fmt(p.likes+(S.liked[id]?1:0))}</span>`;
+  b.setAttribute('aria-pressed',!!S.liked[id]);
+}
+
+/* ============ Events ============ */
+$app.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]'); if(!el) return;
+  const act=el.dataset.act, v=el.dataset.v;
+  if((act==='closeSheet') && e.target.closest('[data-stop]') && !e.target.closest('button[data-act="closeSheet"]')) return;
+  switch(act){
+    case 'tab': tab(v); break;
+    case 'go': go(v); break;
+    case 'back': history.back(); break;
+    case 'product': go('product',{id:v}); break;
+    case 'shop': S.shopTab=0; go('shop',{id:v}); break;
+    case 'watch': {
+      const list=PRODUCTS.filter(p=>p.reel && inCity(shopById(p.shop).city));
+      S.reelCat='all'; S.reelFeed='for';
+      let idx=list.findIndex(p=>p.id===v);
+      if(idx<0){ S.city='كل المدن'; idx=PRODUCTS.filter(p=>p.reel).findIndex(p=>p.id===v); }
+      go('reels',{startAt:Math.max(0,idx)}); break;
+    }
+    case 'order': S.qty=1; S.sheet=v; history.pushState({sheet:1},''); render(); break;
+    case 'closeSheet': history.back(); break;
+    case 'qty': S.qty=Math.min(9,Math.max(1,S.qty+(+v))); { const d=S.district; render(); } break;
+    case 'sendWA': toast('في التطبيق الحقيقي: يُفتح واتساب برسالة جاهزة'); break;
+    case 'waShop': toast('في التطبيق الحقيقي: يُفتح واتساب المتجر'); break;
+    case 'call': toast('في التطبيق الحقيقي: يتصل برقم المتجر'); break;
+    case 'share': toast('تم نسخ رابط المنتج'); break;
+    case 'soon': toast('هذه الشاشة خارج نطاق النموذج'); break;
+    case 'like': { S.liked[v]=!S.liked[v]; const r=el.closest('.reel'); if(r) updateLike(r,v); else render(); break; }
+    case 'save': S.saved[v]=!S.saved[v]; toast(S.saved[v]?'تم الحفظ في المحفوظات':'أُزيل من المحفوظات'); render(); break;
+    case 'follow': S.followed[v]=!S.followed[v]; toast(S.followed[v]?'تتابع هذا المتجر الآن':'ألغيت المتابعة'); render(); break;
+    case 'feed': S.reelFeed=v; render(true); break;
+    case 'reelCat': S.reelCat=v; render(true); break;
+    case 'color': { const [id,i]=v.split('|'); S.color[id]=+i; render(); break; }
+    case 'shopTab': S.shopTab=+v; render(); break;
+    case 'cityMenu': S.cityMenu=!S.cityMenu; render(); break;
+    case 'closeMenu': S.cityMenu=false; render(); break;
+    case 'setCity': S.city=v; S.cityMenu=false; render(cur().name==='reels'); break;
+    case 'storesInst': S.storesInst=!S.storesInst; render(); break;
+    case 'bfilter': S.browseFilters[v]=!S.browseFilters[v]; render(); break;
+    case 'catalogCat': S.catalogCat=v; S.q=''; go('catalog'); break;
+    case 'catalogCatSet': S.catalogCat=v; render(); break;
+    case 'sort': S.catalogSort=(S.catalogSort+1)%3; render(); break;
+  }
+});
+
+history.replaceState({d:1},'');
+render(true);
+(()=>{const t=document.createElement('div');t.className='demoTag';t.textContent='نموذج تجريبي — للتجربة فقط';document.body.appendChild(t);setTimeout(()=>{t.style.transition='opacity .6s';t.style.opacity='0';setTimeout(()=>t.remove(),700);},3500);})();
+</script>
+</body>
+</html>
